@@ -1,9 +1,11 @@
+// ******** Variables**************
 nodeArgs = process.argv;
 command = process.argv[2];
+var songName = "";
+var movieName = "";
 
 // ******* Twitter Command **********
-if (command === "my-tweets") {
-
+function tweets() {
 	var keys = require('./keys.js');
 
 	var Twitter = require('twitter');
@@ -16,7 +18,7 @@ if (command === "my-tweets") {
 	})
 
 	client.get('https://api.twitter.com/1.1/statuses/user_timeline.json?screen_name=rix6code&count=20', function(error, tweets, response) {
-	  	if(error) {
+	  	if (error) {
 	  		console.log(error);
 	  	} else {
 	  		console.log("*******************************");
@@ -32,11 +34,10 @@ if (command === "my-tweets") {
 	});
 }
 
-// ********* OMDB Command ***********
-if (command === "movie-this") {
-	
+// ********* OMDB Command **********	
+function movie() {
 	var request = require('request');
-	var movieName = "";
+	// var movieName = "";
 
 	// for loop for movie name including multiple word movies
 	for (var i = 3; i < nodeArgs.length; i++) {
@@ -48,8 +49,9 @@ if (command === "movie-this") {
 	}
 
 	request('http://www.omdbapi.com/?t=' + movieName, function (error, response, body) {
- 		
- 		if (movieName === "") {
+ 		if (error) {
+ 			console.log(error);
+ 		} else if (movieName === "") {
  		console.log("-------------------------");
 		console.log('If you haven\'t watched "Mr. Nobody," then you should: http:www.imdb.com/title/tt0485947/');
 		console.log("It's on Netflix!");
@@ -71,15 +73,14 @@ if (command === "movie-this") {
 }
 
 // *********** Spotify Command ******************
-if (command === "spotify-this-song") {
-
+function song() {
 	var spotify = require('spotify');
-	var songName = "";
+	// var songName = "";
 
 	// for loop for song name including multiple word songs
 	for (var i = 3; i < nodeArgs.length; i++) {
 		if (i > 3 && i < nodeArgs.length) {
-		songName = songName + "+" + nodeArgs[i];
+			songName = songName + "+" + nodeArgs[i];
 		} else {
 			songName += nodeArgs[i]; 
 		}
@@ -88,12 +89,17 @@ if (command === "spotify-this-song") {
 	// if no song is provided look up "The Sign" by Ace of Base
 	if (songName === "") {
 		spotify.lookup({ type: 'track', id: "0hrBpAOgrt8RXigk83LLNE" }, function(err, data) {
+			if ( err ) {
+		        console.log('Error occurred: ' + err);
+		        return;
+	        } else {
 	    	console.log("-------------------------");
 	 		console.log("Artist(s): " + data.artists[0].name);
 	 		console.log("Song Name: " + data.name);
 	 		console.log("Spotify Preview Link: " + data.preview_url);
 	 		console.log("From the album: " + data.album.name);
 	 		console.log("-------------------------");
+	 		}	
 		});
 	// if song is provided 
 	} else {
@@ -102,7 +108,6 @@ if (command === "spotify-this-song") {
 		        console.log('Error occurred: ' + err);
 		        return;
 		   	} else {
-		 	// console.log(JSON.stringify(data, null, 2));
 		 	console.log("-------------------------");
 		 	console.log("Artist(s): " + data.tracks.items[0].album.artists[0].name);
 		 	console.log("Song Name: " + data.tracks.items[0].name);
@@ -113,16 +118,36 @@ if (command === "spotify-this-song") {
 		});
 	}
 }
-
-
+	
 // ******** do-what-it-says Command **************
-if (command === "do-what-it-says") {
- 	
+function readText() {
+ 	var fs = require("fs");
+
+	fs.readFile("random.txt", "utf8", function(error, data) {
+  	
+  	var dataArr = data.split(",");
+
+		// console.log(dataArr[0]);
+	    // console.log(dataArr[1]);
+	  	
+	  	if (dataArr[0] === "spotify-this-song") {
+		  	songName = dataArr[1];
+		  	song();
+	  	} else if (dataArr[0] === "movie-this") {
+	  		movieName = dataArr[1];
+	  		movie();
+	  	} else if (dataArr[0] === "my-tweets") {
+	  		tweets();
+	  	}
+  	});
 }
 
-
-
-
-
-
-
+if (command === "spotify-this-song") {
+	song();
+} else if (command === "my-tweets") {
+	tweets();
+} else if (command === "movie-this") {
+	movie();
+} else if (command === "do-what-it-says") {
+	readText();
+}
