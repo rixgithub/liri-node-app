@@ -112,7 +112,7 @@ function song() {
 		});
 	// if song is provided 
 	} else {
-		spotify.search({ type: 'track', query: songName, }, function(err, data) {
+		spotify.search({ type: 'track', query: '"' + songName + '"' }, function(err, data) {
 		    if ( err ) {
 		        console.log('Error occurred: ' + err);
 		        return;
