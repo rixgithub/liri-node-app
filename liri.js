@@ -1,14 +1,15 @@
-// ******** Variables**************
 nodeArgs = process.argv;
 command = process.argv[2];
+var request = require('request');
+var spotify = require('spotify');
+var Twitter = require('twitter');
+var fs = require("fs");
 var songName = "";
 var movieName = "";
 
 // ******* Twitter Command **********
 function tweets() {
 	var keys = require('./keys.js');
-
-	var Twitter = require('twitter');
 
 	var client = new Twitter ({
 		consumer_key: keys.twitterKeys.consumer_key,
@@ -29,18 +30,22 @@ function tweets() {
 				console.log("Created on " + tweets[i].created_at);
 				console.log(tweets[i].text);
 				console.log("-------------------------");
+				fs.appendFile('./log.txt', tweets[i].text + ", ", function(err) {
+					if (err) {
+						return console.log(err);
+					}
+					console.log('Your log.txt updated');
+				});
 			}
-	  	}
+		}
 	});
 }
 
 // ********* OMDB Command **********	
 function movie() {
-	var request = require('request');
-	// var movieName = "";
 
 	// for loop for movie name including multiple word movies
-	for (var i = 3; i < nodeArgs.length; i++) {
+	for (i = 3; i < nodeArgs.length; i++) {
 		if (i > 3 && i < nodeArgs.length) {
 		movieName = movieName + "+" + nodeArgs[i];
 		} else {
@@ -69,16 +74,20 @@ function movie() {
  		console.log("Website URL: " + JSON.parse(body).Website);
  		console.log("-------------------------");
  		}
+ 		fs.appendFile('./log.txt', JSON.parse(body).Title + ", ", function(err) {
+					if (err) {
+						return console.log(err);
+					}
+					console.log('Your log.txt updated');
+		});
 	});	
 }
 
 // *********** Spotify Command ******************
 function song() {
-	var spotify = require('spotify');
-	// var songName = "";
 
 	// for loop for song name including multiple word songs
-	for (var i = 3; i < nodeArgs.length; i++) {
+	for (i = 3; i < nodeArgs.length; i++) {
 		if (i > 3 && i < nodeArgs.length) {
 			songName = songName + "+" + nodeArgs[i];
 		} else {
@@ -115,13 +124,18 @@ function song() {
 		 	console.log("This song is from the album: " + data.tracks.items[0].album.name);
 		 	console.log("-------------------------");
 		 	}
+		 	fs.appendFile('./log.txt', data.tracks.items[0].name + ", ", function(err) {
+					if (err) {
+						return console.log(err);
+					}
+					console.log('Your log.txt updated');
+			});
 		});
 	}
 }
 	
 // ******** do-what-it-says Command **************
 function readText() {
- 	var fs = require("fs");
 
 	fs.readFile("random.txt", "utf8", function(error, data) {
   	
