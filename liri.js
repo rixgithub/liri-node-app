@@ -11,12 +11,9 @@ var movieName = "";
 function tweets() {
 	var keys = require('./keys.js');
 
-	var client = new Twitter ({
-		consumer_key: keys.twitterKeys.consumer_key,
-		consumer_secret: keys.twitterKeys.consumer_secret,
-		access_token_key: keys.twitterKeys.access_token_key,
-		access_token_secret: keys.twitterKeys.access_token_secret
-	})
+	// since you've already named your twitter keys the same as what the Twitter client expects
+	// you can simply pass those in instead of redundantly naming them.
+	var client = new Twitter (keys.twitterKeys)
 
 	client.get('https://api.twitter.com/1.1/statuses/user_timeline.json?screen_name=rix6code&count=20', function(error, tweets, response) {
 	  	if (error) {
@@ -62,19 +59,22 @@ function movie() {
 		console.log("It's on Netflix!");
 		console.log("-------------------------");
 		} else {
+		// Instead of repeatedly parsing the body, you can simply redefine the body as it's parsed result
+		body = JSON.parse(body)
+		// and then you can save yourself a few key strokes and a few computing cycles like so:
  		console.log("-------------------------");
- 		console.log("Title: " + JSON.parse(body).Title);
- 		console.log("Year: " + JSON.parse(body).Year);
- 		console.log("IMDB Rating: " + JSON.parse(body).imdbRating);
- 		console.log("Country: " + JSON.parse(body).Country);
- 		console.log("Language: " + JSON.parse(body).Language );
- 		console.log("Plot: " + JSON.parse(body).Plot);
- 		console.log("Actors: " + JSON.parse(body).Actors);
- 		console.log("Rotten Tomatoes Rating: " + JSON.parse(body).Ratings[1].Value);
- 		console.log("Website URL: " + JSON.parse(body).Website);
+ 		console.log("Title: " + body.Title);
+ 		console.log("Year: " + body.Year);
+ 		console.log("IMDB Rating: " + body.imdbRating);
+ 		console.log("Country: " + body.Country);
+ 		console.log("Language: " + body.Language );
+ 		console.log("Plot: " + body.Plot);
+ 		console.log("Actors: " + body.Actors);
+ 		console.log("Rotten Tomatoes Rating: " + body.Ratings[1].Value);
+ 		console.log("Website URL: " + body.Website);
  		console.log("-------------------------");
  		}
- 		fs.appendFile('./log.txt', JSON.parse(body).Title + ", ", function(err) {
+ 		fs.appendFile('./log.txt', body.Title + ", ", function(err) {
 					if (err) {
 						return console.log(err);
 					}
@@ -117,14 +117,17 @@ function song() {
 		        console.log('Error occurred: ' + err);
 		        return;
 		   	} else {
+		  // when you find yourself accessing such a deeply nested piece of data
+		  // you can go ahead and assign it to a variable for the sake of readability
+		  var trackInfo = data.tracks.items[0]
 		 	console.log("-------------------------");
-		 	console.log("Artist(s): " + data.tracks.items[0].album.artists[0].name);
-		 	console.log("Song Name: " + data.tracks.items[0].name);
-		 	console.log("Spotify Preview Link: " + data.tracks.items[0].preview_url);
-		 	console.log("This song is from the album: " + data.tracks.items[0].album.name);
+		 	console.log("Artist(s): " + trackInfo.album.artists[0].name);
+		 	console.log("Song Name: " + trackInfo.name);
+		 	console.log("Spotify Preview Link: " + trackInfo.preview_url);
+		 	console.log("This song is from the album: " + trackInfo.album.name);
 		 	console.log("-------------------------");
 		 	}
-		 	fs.appendFile('./log.txt', data.tracks.items[0].name + ", ", function(err) {
+		 	fs.appendFile('./log.txt', trackInfo.name + ", ", function(err) {
 					if (err) {
 						return console.log(err);
 					}
